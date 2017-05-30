@@ -5,6 +5,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+import com.alisiikh.database.DatabaseHelper
 import com.alisiikh.domain.Todo
 import com.alisiikh.service.TodoService
 import org.slf4j.LoggerFactory
@@ -16,7 +17,7 @@ import scala.util.{Failure, Success}
 /**
   * @author alisiikh.
   */
-object WebServer extends App with JsonSupport  {
+object WebServer extends App with JsonSupport {
 
   private val LOG = LoggerFactory.getLogger(WebServer.getClass)
 
@@ -26,21 +27,26 @@ object WebServer extends App with JsonSupport  {
 
   val routes =
     pathPrefix("todos") {
+      path(LongNumber) { id =>
         get {
-          complete("Hello world")
-        } ~
-        (get & path(LongNumber)) { id =>
           complete(TodoService.findOne(id))
         } ~
-        (post & entity(as[Todo])) { item =>
-          ???
+        delete {
+          TodoService.delete(id)
+
+          complete(StatusCodes.NoContent)
+        }
+      } ~
+        get {
+          complete(TodoService.findAll())
         } ~
-        (put & entity(as[Todo])) { item =>
-          ???
+        (post & entity(as[Todo])) { todo =>
+          TodoService.saveOrUpdate(todo)
+          complete(todo)
         } ~
-        (delete & path(LongNumber)) { id =>
+        (put & entity(as[Todo])) { todo =>
           ???
-      }
+        }
     }
 
   val (host, port) = ("localhost", 8080)
@@ -48,7 +54,14 @@ object WebServer extends App with JsonSupport  {
     .bindAndHandle(routes, host, port)
 
   bindingFuture.onComplete {
-    case Success(_) => LOG.info(s"Server started at http://$host:$port")
+    case Success(_) => {
+      LOG.info(s"Server started at http://$host:$port")
+
+      LOG.info("Populating database with schema and test data")
+      DatabaseHelper.populateDatabase()
+
+      LOG.info("Success, now server is ready to work")
+    }
     case Failure(ex) => LOG.error("Failed to start server", ex)
   }
 }

@@ -24,6 +24,4 @@ object DatabaseHelper {
 
     db.run(setup)
   }
-
-  populateDatabase()
 }
