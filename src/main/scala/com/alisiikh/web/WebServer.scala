@@ -26,9 +26,11 @@ object WebServer extends App with JsonSupport  {
 
   val routes =
     pathPrefix("todos") {
-      pathEnd {
-        (get & path(Segment)) { id =>
-          complete(TodoService.findOne(1))
+        get {
+          complete("Hello world")
+        } ~
+        (get & path(LongNumber)) { id =>
+          complete(TodoService.findOne(id))
         } ~
         (post & entity(as[Todo])) { item =>
           ???
@@ -36,9 +38,8 @@ object WebServer extends App with JsonSupport  {
         (put & entity(as[Todo])) { item =>
           ???
         } ~
-        (delete & path(Segment)) { id =>
+        (delete & path(LongNumber)) { id =>
           ???
-        }
       }
     }
 
