@@ -1,27 +1,33 @@
 package com.alisiikh.database
 
+import com.alisiikh.domain.{Todo, Todos}
+import slick.dbio.DBIOAction
+import slick.lifted.TableQuery
+
 import slick.jdbc.H2Profile.api._
 
 /**
   * @author alisiikh.
   */
-object DatabaseHelper {
-  val db = Database.forConfig("h2Database")
+class DatabaseHelper extends DatabaseAccessor {
 
-  val todos = Queries.todos
+  private val todos = TableQuery[Todos]
 
-  def populateDatabase(): Unit = {
-    val setup = DBIO.seq(
-      // Create schema
-      todos.schema.create,
-
-      todos ++= Seq(
-        (1, "Learn Scala", true),
-        (2, "Learn Akka", true),
-        (3, "Buy a car", false)
-      )
+  def initSchema(): Unit = {
+    val setup = DBIOAction.seq(
+      todos.schema.create
     )
 
     db.run(setup)
+  }
+
+  def createTestData() {
+    val inserts = todos ++= Seq(
+      Todo(1, "Learn Scala", done = true),
+      Todo(2, "Learn Akka", done = true),
+      Todo(3, "Buy a car", done = false)
+    )
+
+    db.run(inserts)
   }
 }

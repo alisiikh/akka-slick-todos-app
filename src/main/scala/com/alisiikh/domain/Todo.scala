@@ -8,12 +8,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * @author alisiikh.
   */
-class TodoTable(tag: Tag) extends Table[(Long, String, Boolean)](tag, "todos") {
+class Todos(tag: Tag) extends Table[Todo](tag, "todos") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def desc = column[String]("description")
   def done = column[Boolean]("done")
 
-  def * : ProvenShape[(Long, String, Boolean)] = (id, desc, done)
+  def * : ProvenShape[Todo] = (id, desc, done) <> (Todo.tupled, Todo.unapply)
 }
 
 case class Todo(id: Long, desc: String, done: Boolean)

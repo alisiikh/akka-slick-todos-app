@@ -17,5 +17,5 @@ trait Core {
 trait BootedCore extends Core {
   implicit val actorSystem = ActorSystem("system")
   implicit val materializer = ActorMaterializer()
-  implicit val executionContext = actorSystem.dispatcher
+  implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 }
